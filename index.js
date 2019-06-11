@@ -12,7 +12,7 @@ const start = async () => {
     fs.mkdirSync(OUTPUT_PATH)
   }
 
-  // Get imgur urls
+  // Get gif urls
   // TODO: Gyfcat as well: https://developers.gfycat.com/api/#getting-gfycats
   // TODO: What if no mp4 available?
   // TODO: Check length of mp4?
@@ -20,20 +20,13 @@ const start = async () => {
     'https://i.imgur.com/ZzvLeYr.mp4',
     'https://i.imgur.com/5HBrg7a.mp4',
     'https://i.imgur.com/T3ontQy.mp4',
-    'https://i.imgur.com/KpOrSbE.mp4'
+    'https://i.imgur.com/EeZQF45.gifv',
+    'https://gfycat.com/thirstyrectangulareel'
   ]
 
   // Download files
   urls.forEach(url => {
-    const downloadProcess = fork('./src/imgur.js', [ OUTPUT_PATH ])
-    downloadProcess.on('message', ({ resultName }) => {
-      if (resultName) {
-        console.log(`Downloaded: ${ resultName }`)
-        const slowMoProcess = fork('./src/ffmpeg.js', [ OUTPUT_PATH ])
-        slowMoProcess.send({ fileName: resultName })
-      }
-    })
-    downloadProcess.send({ url })
+    fork('./src/bot.js', [ OUTPUT_PATH, url ])
   })
 }
 

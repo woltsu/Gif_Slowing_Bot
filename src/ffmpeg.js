@@ -1,17 +1,9 @@
 const spawn = require('child_process').spawn
 const path = require('path')
 
-process.on('message', ({ fileName }) => {
-  if (fileName) {
-    const OUTPUT_PATH = process.argv[2]
-    console.log(`converting ${ fileName } to slowmo...`)
-    slowMo(fileName, OUTPUT_PATH)
-  } else {
-    process.exit(1)
-  }
-})
+const LOGGING = false
 
-const slowMo = (fileName, dir) => {
+const slowMo = async (fileName, dir) => {
   const file = path.resolve(dir, `${fileName}.mp4`)
   const result = path.resolve(dir, `${fileName}-slowed.mp4`)
 
@@ -25,7 +17,12 @@ const slowMo = (fileName, dir) => {
     process.exit(0)
   })
 
-  //ffmpeg.stderr.on('data', (data) => console.log(new String(data)))
+  return new Promise((resolve) => {
+    if (LOGGING) {
+      ffmpeg.stderr.on('data', (data) => console.log(new String(data)))
+    }
+    ffmpeg.on('exit', () => resolve(true))
+  })
 }
 
 module.exports = {
