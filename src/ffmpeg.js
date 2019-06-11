@@ -1,7 +1,6 @@
 const spawn = require('child_process').spawn
 const path = require('path')
-
-const LOGGING = false
+const { LOGGING } = require('./config')
 
 const slowMo = async (fileName, dir) => {
   const file = path.resolve(dir, `${fileName}.mp4`)

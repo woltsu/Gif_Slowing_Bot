@@ -1,21 +1,18 @@
-// Imports
 const fs = require('fs')
 const path = require('path')
 const fork = require('child_process').fork
+const { OUTPUT_DIR } = require('./src/config')
 
-// Constants
-const OUTPUT_PATH = path.resolve(path.dirname(require.main.filename), './output')
+const OUTPUT_PATH = path.resolve(path.dirname(require.main.filename), OUTPUT_DIR)
 
 const start = async () => {
-  // Init
   if (!fs.existsSync(OUTPUT_PATH)) {
     fs.mkdirSync(OUTPUT_PATH)
   }
 
   // Get gif urls
-  // TODO: Gyfcat as well: https://developers.gfycat.com/api/#getting-gfycats
-  // TODO: What if no mp4 available?
   // TODO: Check length of mp4?
+  // TODO: Add Reddit integration
   const urls = [
     'https://i.imgur.com/ZzvLeYr.mp4',
     'https://i.imgur.com/5HBrg7a.mp4',
