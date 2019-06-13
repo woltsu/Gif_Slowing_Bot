@@ -5,7 +5,9 @@ const { CHARS } = require('./config')
 
 const download = async (url, dir) => {
   const resultName = generateName()
-  const formattedUrl = await getGifData(url)
+  const gifData = await getGifData(url)
+  console.log('gifData', gifData)
+  const { url: formattedUrl } = gifData
 
   const resultPath = path.resolve(dir, `${resultName}.mp4`)
   const writer = fs.createWriteStream(resultPath)
@@ -44,12 +46,16 @@ const getImgurUrl = async (id) => {
     Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`
   }
   const { data: { data } } = await axios.get(`https://api.imgur.com/3/image/${id}`, { headers })
-  return data.mp4
+  return {
+    url: data.mp4
+  }
 }
 
 const getGfycatUrl = async (id) => {
-  const { data } = await axios.get(`https://api.gfycat.com/v1/gfycats/${id}`)
-  return data.gfyItem.mp4Url
+  const { data: { gfyItem } } = await axios.get(`https://api.gfycat.com/v1/gfycats/${id}`)
+  return {
+    url: gfyItem.mp4Url
+  }
 }
 
 const generateName = () => {
