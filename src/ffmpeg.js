@@ -11,11 +11,6 @@ const slowMo = async (fileName, dir) => {
     [ '-y', '-i', file, '-vf', 'setpts=2*PTS', result ]
   )
 
-  ffmpeg.on('exit', () => {
-    console.log(`${ fileName } conversion finished`)
-    process.exit(0)
-  })
-
   return new Promise((resolve) => {
     if (LOGGING) {
       ffmpeg.stderr.on('data', (data) => console.log(new String(data)))

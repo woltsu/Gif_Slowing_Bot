@@ -1,13 +1,18 @@
 const axios = require('axios').default
-const { VERSION } = require('./config')
+const decode = require('unescape')
+const { VERSION, SUPPORTED_DOMAINS } = require('./config')
 
 const getUrls = async () => {
   await initRedditApi()
   const messages = await getMentionedMessages()
   const urlPromises = messages.map(m => getUrlItem(m))
+  
+  console.log('Getting gif urls from mentions...')
   return new Promise(resolve => {
     Promise.all(urlPromises).then((items) => {
-      resolve(items)
+      resolve(items.filter(({ domain }) => {
+        return SUPPORTED_DOMAINS.includes(domain)
+      }))
     })
   })
 }
@@ -17,21 +22,24 @@ const getUrlItem = async (comment) => {
 
   const commentInfoUrl = `/r/${subreddit}/api/info?id=${kind}_${id}`
   const { data: commentInfo } = await axios.get(commentInfoUrl)
-  const { data: { link_id, id: commentId } } = commentInfo.data.children[0]
+  const { data: { link_id} } = commentInfo.data.children[0]
 
   const linkInfoUrl = `/r/${subreddit}/api/info?id=${link_id}`
   const { data: linkInfo } = await axios.get(linkInfoUrl)
-  const { data: { url } } = linkInfo.data.children[0]
+  const { data: { url, domain } } = linkInfo.data.children[0]
 
   return {
-    url,
+    url: decode(url),
     commentId: id,
-    title: link_title
+    title: link_title,
+    domain: domain
   }
 }
 
 const initRedditApi = async () => {
+  console.log('Authenticating to Reddit...')
   const accessToken = await getRedditAccessToken()
+  token = accessToken
   axios.interceptors.request.use((config) => ({
     baseURL: 'https://oauth.reddit.com',
     ...config,
@@ -74,6 +82,7 @@ const getRedditAccessToken = async () => {
 }
 
 const getMentionedMessages = async () => {
+  console.log('Getting Reddit mentions...')
   const { data: { data } } = await axios.get(
     '/message/unread'
   )

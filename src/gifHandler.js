@@ -1,12 +1,11 @@
 const fs = require('fs')
 const path = require('path')
 const axios = require('axios').default
-const { CHARS } = require('./config')
+const { CHARS, DOMAINS } = require('./config')
 
-const download = async (url, dir) => {
+const download = async (urlItem, dir) => {
   const resultName = generateName()
-  const gifData = await getGifData(url)
-  console.log('gifData', gifData)
+  const gifData = await getGifData(urlItem)
   const { url: formattedUrl } = gifData
 
   const resultPath = path.resolve(dir, `${resultName}.mp4`)
@@ -25,19 +24,20 @@ const download = async (url, dir) => {
   })
 }
 
-const getGifData = async (url) => {
-  if (url.includes('imgur')) {
+const getGifData = async ({ url, domain }) => {
+  if (domain === DOMAINS.imgur) {
     const urlParts = url.split('/')
     const id = urlParts[urlParts.length - 1].split('.')[0]
     return await getImgurUrl(id)
 
-  } else if (url.includes('gfycat')) {
+  } else if (domain === DOMAINS.gfycat) {
     const urlParts = url.split('/')
     return await getGfycatUrl(urlParts[urlParts.length - 1])
 
+  } else if (domain === DOMAINS.reddit) {
+    return { url }
   } else {
-    // TODO: Reddit hosted gifs / videos
-    return null
+    throw Error('Unsupported domain!')
   }
 }
 

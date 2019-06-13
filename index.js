@@ -18,21 +18,11 @@ const start = async () => {
   // TODO: Upload results to imgur
   // TODO: Test how well raspberry performs
   // TODO: Database?
+  const urlItems = await getUrls()
 
-  const urls = await getUrls()
-  console.log('URLS', urls)
-
-  /* const urls = [
-    'https://i.imgur.com/ZzvLeYr.mp4',
-    'https://i.imgur.com/5HBrg7a.mp4',
-    'https://i.imgur.com/T3ontQy.mp4',
-    'https://i.imgur.com/EeZQF45.gifv',
-    'https://gfycat.com/thirstyrectangulareel'
-  ]
-
-  urls.forEach(url => {
-    fork('./src/bot.js', [ OUTPUT_PATH, url ])
-  }) */
+  urlItems.forEach(item => {
+    fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item)])
+  })
 }
 
 start()

@@ -2,12 +2,17 @@ const { download } = require('./gifHandler')
 const { slowMo } = require('./ffmpeg')
 
 const OUTPUT_PATH = process.argv[2]
-const URL = process.argv[3]
+const urlItem = JSON.parse(process.argv[3])
 
 const runBot = async () => {
-  const fileName = await download(URL, OUTPUT_PATH)
-  //await slowMo(fileName, OUTPUT_PATH)
-  process.exit(true)
+  console.log(`Downloading ${ urlItem.url }...`)
+  const fileName = await download(urlItem, OUTPUT_PATH)
+
+  console.log(`Applying slow mo to ${ fileName }...`)
+  await slowMo(fileName, OUTPUT_PATH)
+
+  // TODO: Reddit reply
+  console.log(`${ fileName } done!`)
 }
 
 runBot()
