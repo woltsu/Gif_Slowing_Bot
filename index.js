@@ -20,6 +20,7 @@ const start = async () => {
   // TODO: Database?
 
   const urls = await getUrls()
+  console.log('URLS', urls)
 
   /* const urls = [
     'https://i.imgur.com/ZzvLeYr.mp4',
