@@ -1,6 +1,7 @@
 const axios = require('axios').default
 const decode = require('unescape')
-const { VERSION, SUPPORTED_DOMAINS } = require('./config')
+const { VERSION, SUPPORTED_DOMAINS, ERRORS } = require('./config')
+const { handleError } = require('./errorHandler')
 
 const getUrls = async () => {
   await initRedditApi()
@@ -18,38 +19,46 @@ const getUrls = async () => {
 }
 
 const getUrlItem = async (comment) => {
-  const { kind, data: { id, subreddit, link_title } } = comment
+  try {
+    const { kind, data: { id, subreddit, link_title } } = comment
 
-  const commentInfoUrl = `/r/${subreddit}/api/info?id=${kind}_${id}`
-  const { data: commentInfo } = await axios.get(commentInfoUrl)
-  const { data: { link_id} } = commentInfo.data.children[0]
+    const commentInfoUrl = `/r/${subreddit}/api/info?id=${kind}_${id}`
+    const { data: commentInfo } = await axios.get(commentInfoUrl)
+    const { data: { link_id} } = commentInfo.data.children[0]
 
-  const linkInfoUrl = `/r/${subreddit}/api/info?id=${link_id}`
-  const { data: linkInfo } = await axios.get(linkInfoUrl)
-  const { data: { url, domain } } = linkInfo.data.children[0]
+    const linkInfoUrl = `/r/${subreddit}/api/info?id=${link_id}`
+    const { data: linkInfo } = await axios.get(linkInfoUrl)
+    const { data: { url, domain } } = linkInfo.data.children[0]
 
-  return {
-    url: decode(url),
-    commentId: id,
-    title: link_title,
-    domain: domain
+    return {
+      url: decode(url),
+      commentId: id,
+      title: link_title,
+      domain: domain
+    }
+  } catch (e) {
+    handleError(e, ERRORS.ERROR_FETCHING_REDDIT_URL_DATA)
   }
 }
 
 const initRedditApi = async () => {
   console.log('Authenticating to Reddit...')
-  const accessToken = await getRedditAccessToken()
-  token = accessToken
-  axios.interceptors.request.use((config) => ({
-    baseURL: 'https://oauth.reddit.com',
-    ...config,
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'User-Agent': `gif_slowing_bot/${VERSION} by /u/Gif_Slowing_Bot`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      ...config.headers
-    }
-  }))
+  try {
+    const accessToken = await getRedditAccessToken()
+    token = accessToken
+    axios.interceptors.request.use((config) => ({
+      baseURL: 'https://oauth.reddit.com',
+      ...config,
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'User-Agent': `gif_slowing_bot/${VERSION} by /u/Gif_Slowing_Bot`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        ...config.headers
+      }
+    }))
+  } catch (e) {
+    handleError(e, ERRORS.ERROR_AUTHENTICATING_TO_REDDIT)
+  }
 }
 
 const getRedditAccessToken = async () => {
@@ -83,11 +92,15 @@ const getRedditAccessToken = async () => {
 
 const getMentionedMessages = async () => {
   console.log('Getting Reddit mentions...')
-  const { data: { data } } = await axios.get(
-    '/message/unread'
-  )
+  try {
+    const { data: { data } } = await axios.get(
+      '/message/unread'
+    )
 
-  return await processMessages(data.children)
+    return await processMessages(data.children)
+  } catch (e) {
+    handleError(e, ERRORS.ERROR_FETCHING_REDDIT_MENTIONS)
+  }
 }
 
 const processMessages = async (messages) => {
@@ -112,12 +125,16 @@ const markMessagesRead = async (messages) => {
 }
 
 const markMessageRead = async ({ kind, data: { id } }) => {
-  const data = new URLSearchParams()
-  data.append('id', `${kind}_${id}`)
-  return await axios.post(
-    '/api/read_message',
-    data.toString()
-  )
+  try {
+    const data = new URLSearchParams()
+    data.append('id', `${kind}_${id}`)
+    return await axios.post(
+      '/api/read_message',
+      data.toString()
+    )
+  } catch (e) {
+    handleError(e, ERRORS.ERROR_MARKING_REDDIT_MESSAGE_READ)
+  }
 }
 
 module.exports = {

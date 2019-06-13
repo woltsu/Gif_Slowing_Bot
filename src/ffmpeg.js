@@ -8,7 +8,7 @@ const slowMo = async (fileName, dir) => {
 
   const ffmpeg = spawn(
     'ffmpeg',
-    [ '-y', '-i', file, '-vf', 'setpts=2*PTS', result ]
+    [ '-y', '-i', file, '-vf', 'setpts=4*PTS', result ]
   )
 
   return new Promise((resolve) => {
