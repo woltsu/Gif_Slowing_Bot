@@ -28,11 +28,12 @@ const getUrlItem = async (comment) => {
 
     const linkInfoUrl = `/r/${subreddit}/api/info?id=${link_id}`
     const { data: linkInfo } = await axios.get(linkInfoUrl)
-    const { data: { url, domain } } = linkInfo.data.children[0]
+    const { data: { url, domain, subreddit_id} } = linkInfo.data.children[0]
 
     return {
       url: decode(url),
       commentId: id,
+      kind,
       title: link_title,
       domain: domain
     }
@@ -97,34 +98,15 @@ const getMentionedMessages = async () => {
       '/message/unread'
     )
 
-    return await processMessages(data.children)
+    return data.children.filter(({ data: { subject } }) => {
+      return subject === 'username mention'
+    })
   } catch (e) {
     handleError(e, ERRORS.ERROR_FETCHING_REDDIT_MENTIONS)
   }
 }
 
-const processMessages = async (messages) => {
-  const mentionMessages = messages.filter(({ data: { subject } }) => {
-    return subject === 'username mention'
-  })
-
-  if (messages.length) {
-    //await markMessagesRead(messages)
-  }
-
-  return mentionMessages
-}
-
-const markMessagesRead = async (messages) => {
-  const promises = messages.map(m => markMessageRead(m))
-  return new Promise(resolve => {
-    Promise.all(promises).then(() => {
-      resolve()
-    })
-  })
-}
-
-const markMessageRead = async ({ kind, data: { id } }) => {
+module.exports.markMessageRead = async ({ kind, id }) => {
   try {
     const data = new URLSearchParams()
     data.append('id', `${kind}_${id}`)

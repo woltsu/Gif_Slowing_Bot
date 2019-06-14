@@ -1,24 +1,41 @@
 const spawn = require('child_process').spawn
 const path = require('path')
-const { LOGGING } = require('./config')
+const { LOGGING, DEFAULT_FORMAT } = require('./config')
 
-const slowMo = async (fileName, dir) => {
-  const file = path.resolve(dir, `${fileName}.mp4`)
-  const result = path.resolve(dir, `${fileName}-slowed.mp4`)
+const slowMo = (fileName, dir) => {
+  const file = path.resolve(dir, `${fileName}.${DEFAULT_FORMAT}`)
+  const result = path.resolve(dir, `${fileName}.slowed.${DEFAULT_FORMAT}`)
 
   const ffmpeg = spawn(
     'ffmpeg',
-    [ '-y', '-i', file, '-vf', 'setpts=4*PTS', result ]
+    [ '-y', '-i', file, '-vf', 'setpts=2*PTS', '-t', '00:00:30', result ]
   )
 
-  return new Promise((resolve) => {
+  return processCommand(ffmpeg)
+}
+
+const convertGifToMp4 = (fileName, dir) => {
+  const file = path.resolve(dir, `${fileName}.gif`)
+  const result = path.resolve(dir, `${fileName}.${DEFAULT_FORMAT}`)
+
+  const ffmpeg = spawn(
+    'ffmpeg',
+    [ '-y', '-i', file, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', result ]
+  )
+
+  return processCommand(ffmpeg)
+}
+
+const processCommand = (command) => {
+  return new Promise(resolve => {
     if (LOGGING) {
-      ffmpeg.stderr.on('data', (data) => console.log(new String(data)))
+      command.stderr.on('data', (data) => console.log(new String(data)))
     }
-    ffmpeg.on('exit', () => resolve(true))
+    command.on('exit', () => resolve(true))
   })
 }
 
 module.exports = {
-  slowMo
+  slowMo,
+  convertGifToMp4
 }

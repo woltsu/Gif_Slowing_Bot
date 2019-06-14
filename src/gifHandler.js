@@ -1,15 +1,17 @@
 const fs = require('fs')
 const path = require('path')
 const axios = require('axios').default
-const { CHARS, DOMAINS, ERRORS } = require('./config')
+const FormData = require('form-data')
+const { CHARS, DOMAINS, ERRORS, DEFAULT_FORMAT } = require('./config')
 const { handleError } = require('./errorHandler')
+const { convertGifToMp4 } = require('./ffmpeg')
 
 const download = async (urlItem, dir) => {
   const resultName = generateName()
   const gifData = await getGifData(urlItem)
-  const { url: formattedUrl } = gifData
+  const { url: formattedUrl, format } = gifData
 
-  const resultPath = path.resolve(dir, `${resultName}.mp4`)
+  const resultPath = path.resolve(dir, `${resultName}.${format || DEFAULT_FORMAT}`)
   const writer = fs.createWriteStream(resultPath)
 
   try {
@@ -21,7 +23,12 @@ const download = async (urlItem, dir) => {
     fileStream.data.pipe(writer)
 
     return new Promise((resolve, reject) => {
-      writer.on('finish', () => resolve(resultName))
+      writer.on('finish', async () => {
+        if (format && format !== DEFAULT_FORMAT) {
+          await convertGifToMp4(resultName, dir)
+        }
+        resolve(resultName)
+      })
       writer.on('error', reject)
     })
   } catch (e) {
@@ -39,8 +46,11 @@ const getGifData = async ({ url, domain }) => {
     const urlParts = url.split('/')
     return await getGfycatUrl(urlParts[urlParts.length - 1])
 
-  } else if (domain === DOMAINS.reddit) {
+  } else if (domain === DOMAINS.reddit_preview) {
     return { url }
+
+  } else if (domain === DOMAINS.reddit_i) {
+    return { url, format: 'gif' }
 
   } else {
     handleError(e, ERRORS.ERROR_UNSUPPORTED_DOMAIN)
@@ -78,6 +88,27 @@ const generateName = () => {
   return result
 }
 
+const uploadToImgur = async (file, name) => {
+  try {
+    const formData = new FormData()
+    formData.append('video', fs.createReadStream(file))
+    formData.append('name', name)
+    formData.append('type', 'file')
+    formData.append('disable_audio', 1)
+
+    const headers = {
+      Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+      ...formData.getHeaders()
+    }
+
+    const { data: { data } } = await axios.post(`https://api.imgur.com/3/upload`, formData, { headers })
+    return data.link
+  } catch (e) {
+    console.log('e', e.response.data)
+  }
+}
+
 module.exports = {
-  download
+  download,
+  uploadToImgur
 }
