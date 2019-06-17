@@ -26,6 +26,7 @@ class Bot {
       const slowedFilePath = path.resolve(this.output, `${this.fileName}.slowed.${DEFAULT_FORMAT}`)
       const imgurUrl = await uploadToImgur(slowedFilePath, this.fileName)
       log(`Uploaded ${ this.fileName } to imgur: ${ imgurUrl }`)
+
       process.send({ imgurUrl })
       this._teardown()
     } catch (e) {
