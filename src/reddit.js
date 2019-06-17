@@ -3,6 +3,7 @@ const decode = require('unescape')
 const _ = require('lodash')
 const { VERSION, SUPPORTED_DOMAINS, ERRORS } = require('./config')
 const { handleError } = require('./errorHandler')
+const { log } = require('./utils')
 
 module.exports = class Reddit {
   constructor(props) {
@@ -16,7 +17,7 @@ module.exports = class Reddit {
     const messages = await this._getMentionedMessages()
     const urlPromises = messages.map(m => this._getUrlItem(m))
     
-    console.log('Getting gif urls from mentions...')
+    log('Getting gif urls from mentions...')
     return new Promise(resolve => {
       Promise.all(urlPromises).then((items) => {
         resolve(items.filter(({ domain }) => {
@@ -26,26 +27,28 @@ module.exports = class Reddit {
     })
   }
 
-  async replyToComment(content, commentId) {
+  async replyToComment(content, id) {
     try {
       const commentData = new URLSearchParams()
-      commentData.append('thing_id', commentId)
+      commentData.append('thing_id', id)
       commentData.append('text', content)
   
       const { data } = await this.api.post(
         'https://oauth.reddit.com/api/comment',
         commentData
       )
-      console.log('DATA', data.success)
+      if (!data.success) {
+        throw new Error()
+      }
     } catch (e) {
       handleError(e, ERRORS.ERROR_REPLYING_TO_REDDIT_COMMENT)
     }
   }
 
-  async markMessageRead(kind, id) {
+  async markMessageRead(id) {
     try {
       const data = new URLSearchParams()
-      data.append('id', `${kind}_${id}`)
+      data.append('id', id)
       await this.api.post(
         'https://oauth.reddit.com/api/read_message',
         data.toString()
@@ -56,7 +59,7 @@ module.exports = class Reddit {
   }
 
   async _getMentionedMessages() {
-    console.log('Getting Reddit mentions...')
+    log('Getting Reddit mentions...')
     try {
       const { data: { data } } = await this.api.get(
         '/message/unread'
@@ -95,6 +98,7 @@ module.exports = class Reddit {
   }
 
   async _initApi() {
+    log('Initializing reddit api...')
     try {
       const accessToken = await this._getAccessToken()
       this.api = axios.create({

@@ -51,12 +51,12 @@ const getGifData = async ({ url, domain }) => {
 
   } else if (domain === DOMAINS.reddit_i) {
     if (url.slice(url.length - 4, url.length) !== '.gif') {
-      handleError(null, ERRORS.ERROR_UNSUPPORTED_FORMAT)
+      handleError(new Error(), ERRORS.ERROR_UNSUPPORTED_FORMAT)
     }
 
     return { url, format: 'gif' }
   } else {
-    handleError(null, ERRORS.ERROR_UNSUPPORTED_DOMAIN)
+    handleError(new Error(), ERRORS.ERROR_UNSUPPORTED_DOMAIN)
   }
 }
 
@@ -107,7 +107,7 @@ const uploadToImgur = async (file, name) => {
     const { data: { data } } = await axios.post(`https://api.imgur.com/3/upload`, formData, { headers })
     return data.link
   } catch (e) {
-    console.log('e', e.response.data)
+    handleError(e, ERRORS.ERROR_UPLOADING_TO_IMGUR)
   }
 }
 
