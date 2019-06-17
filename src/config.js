@@ -26,5 +26,7 @@ module.exports.ERRORS = {
   ERROR_AUTHENTICATING_TO_REDDIT: 'Error authenticating to reddit',
   ERROR_FETCHING_REDDIT_MENTIONS: 'Error fetching reddit mentions',
   ERROR_FETCHING_REDDIT_URL_DATA: 'Error fetching reddit url data',
-  ERROR_MARKING_REDDIT_MESSAGE_READ: 'Error marking reddit messages read'
+  ERROR_MARKING_REDDIT_MESSAGE_READ: 'Error marking reddit messages read',
+  ERROR_REPLYING_TO_REDDIT_COMMENT: 'Error replying to reddit comment',
+  ERROR_UNSUPPORTED_FORMAT: 'Error unsupported format'
 }

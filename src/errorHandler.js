@@ -1,3 +1,5 @@
+const { ERRORS } = require('./config')
+
 module.exports.handleError = (e, message) => {
   console.error(e)
 
@@ -42,6 +44,4 @@ module.exports.handleError = (e, message) => {
       break
     }
   }
-
-  process.exit(1)
 }

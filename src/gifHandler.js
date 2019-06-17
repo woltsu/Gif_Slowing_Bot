@@ -50,10 +50,13 @@ const getGifData = async ({ url, domain }) => {
     return { url }
 
   } else if (domain === DOMAINS.reddit_i) {
-    return { url, format: 'gif' }
+    if (url.slice(url.length - 4, url.length) !== '.gif') {
+      handleError(null, ERRORS.ERROR_UNSUPPORTED_FORMAT)
+    }
 
+    return { url, format: 'gif' }
   } else {
-    handleError(e, ERRORS.ERROR_UNSUPPORTED_DOMAIN)
+    handleError(null, ERRORS.ERROR_UNSUPPORTED_DOMAIN)
   }
 }
 

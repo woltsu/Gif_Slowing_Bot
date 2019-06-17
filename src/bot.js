@@ -1,7 +1,6 @@
 const fs = require('fs')
 const { download, uploadToImgur } = require('./gifHandler')
 const { slowMo } = require('./ffmpeg')
-const { markMessageRead } = require('./reddit')
 const { promisify } = require('util')
 const { DEFAULT_FORMAT } = require('./config')
 const readdir = promisify(fs.readdir)
@@ -22,11 +21,7 @@ const runBot = async () => {
   const slowedFilePath = path.resolve(OUTPUT_PATH, `${fileName}.slowed.${DEFAULT_FORMAT}`)
   const imgurUrl = await uploadToImgur(slowedFilePath, fileName)
   console.log(`Uploaded ${ fileName } to imgur: ${ imgurUrl }`)
-
-  // TODO: Reddit reply
-
-  console.log(`Marking comment ${ urlItem.commentId } read`)
-  // await markMessageRead({ kind: urlItem.kind, id: urlItem.id })
+  process.send({ imgurUrl })
 
   console.log('Removing created files...')
   const files = await readdir(OUTPUT_PATH)
