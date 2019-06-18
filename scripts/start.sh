@@ -6,7 +6,8 @@ docker stop $(docker ps -q --filter ancestor=gif_slowing_bot )
 # Clear output folder
 rm -rf ./output
 
-# Pull latest version from GitHub (TODO)
+# Pull latest version from GitHub
+git pull origin master
 
 # Build image
 docker build -t gif_slowing_bot .
