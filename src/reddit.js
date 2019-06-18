@@ -3,7 +3,7 @@ const decode = require('unescape')
 const _ = require('lodash')
 const { VERSION, SUPPORTED_DOMAINS, ERRORS } = require('./config')
 const { handleError } = require('./errorHandler')
-const { log } = require('./utils')
+const logger = require('./logger')
 
 module.exports = class Reddit {
   constructor(props) {
@@ -17,7 +17,7 @@ module.exports = class Reddit {
     const messages = await this._getMentionedMessages()
     const urlPromises = messages.map(m => this._getUrlItem(m))
     
-    log('Getting gif urls from mentions...')
+    logger.info('Getting gif urls from mentions...')
     return new Promise(resolve => {
       Promise.all(urlPromises).then((items) => {
         resolve(items.filter(({ domain }) => {
@@ -59,7 +59,7 @@ module.exports = class Reddit {
   }
 
   async _getMentionedMessages() {
-    log('Getting Reddit mentions...')
+    logger.info('Getting Reddit mentions...')
     try {
       const { data: { data } } = await this.api.get(
         '/message/unread'
@@ -98,7 +98,7 @@ module.exports = class Reddit {
   }
 
   async _initApi() {
-    log('Initializing reddit api...')
+    logger.info('Initializing reddit api...')
     try {
       const accessToken = await this._getAccessToken()
       this.api = axios.create({

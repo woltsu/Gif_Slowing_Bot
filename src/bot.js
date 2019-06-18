@@ -6,7 +6,7 @@ const { DEFAULT_FORMAT } = require('./config')
 const readdir = promisify(fs.readdir)
 const unlink = promisify(fs.unlink)
 const path = require('path')
-const { log } = require('./utils')
+const logger = require('./logger')
 
 class Bot {
   constructor({ urlItem, output }) {
@@ -16,27 +16,27 @@ class Bot {
 
   async run() {
     try {
-      log(`Downloading ${ this.urlItem.url }...`)
+      logger.info(`Downloading ${ this.urlItem.url }...`)
       this.fileName = await download(this.urlItem, this.output)
 
-      log(`Applying slow mo to ${ this.fileName }...`)
+      logger.info(`Applying slow mo to ${ this.fileName }...`)
       await slowMo(this.fileName, this.output)
 
-      log('Uploading to imgur...')
+      logger.info('Uploading to imgur...')
       const slowedFilePath = path.resolve(this.output, `${this.fileName}.slowed.${DEFAULT_FORMAT}`)
       const imgurUrl = await uploadToImgur(slowedFilePath, this.fileName)
-      log(`Uploaded ${ this.fileName } to imgur: ${ imgurUrl }`)
+      logger.info(`Uploaded ${ this.fileName } to imgur: ${ imgurUrl }`)
 
       process.send({ imgurUrl })
       this._teardown()
     } catch (e) {
       this._teardown()
-      process.send({ error: true })
+      process.send({ error: { name: e.name, message: e.message } })
     }
   }
 
   async _teardown() {
-    log('Tearing bot down...')
+    logger.info('Tearing bot down...')
     if (this.fileName) {
       const files = await readdir(this.output)
       const unlinks = files.filter(f => f.includes(this.fileName)).map(f => unlink(`${this.output}/${f}`))

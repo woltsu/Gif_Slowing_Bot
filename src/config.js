@@ -7,7 +7,7 @@ if (NODE_ENV === 'development') {
 }
 
 module.exports.VERSION = '0.1'
-module.exports.LOGGING = false
+module.exports.LOGGING = true
 module.exports.CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890'
 module.exports.OUTPUT_DIR = './output'
 module.exports.DEFAULT_FORMAT = 'mp4'

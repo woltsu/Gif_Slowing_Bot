@@ -61,16 +61,23 @@ const getGifData = async ({ url, domain }) => {
 }
 
 const getImgurUrl = async (id) => {
+  let result
   try {
     const headers = {
       Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`
     }
     const { data: { data } } = await axios.get(`https://api.imgur.com/3/image/${id}`, { headers })
-    return {
-      url: data.mp4
-    }
+    result = data
   } catch (e) {
     handleError(e, ERRORS.ERROR_FETCHING_GIF_INFO)
+  }
+
+  if (!result.mp4) {
+    handleError(new Error(), ERRORS.ERROR_UNSUPPORTED_FORMAT)
+  }
+
+  return {
+    url: result.mp4
   }
 }
 

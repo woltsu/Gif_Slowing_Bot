@@ -1,1 +1,1 @@
-* * * * * npm run start:prod --prefix /app >> /var/log/bot.log
+* * * * * npm run --silent start:prod --prefix /app >> /var/log/bot.log
