@@ -8,7 +8,7 @@ const slowMo = (fileName, dir) => {
 
   const ffmpeg = spawn(
     'ffmpeg',
-    [ '-y', '-i', file, '-vf', 'setpts=2*PTS', '-t', '00:00:30', result ]
+    [ '-y', '-i', file, '-vf', 'setpts=3*PTS', '-t', '00:00:30', result ]
   )
 
   return processCommand(ffmpeg)

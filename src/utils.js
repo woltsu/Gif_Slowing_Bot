@@ -7,4 +7,4 @@ const log = (...params) => {
 
 module.exports.log = log
 
-module.exports.logError = (...params) => log(chalk.redBright(...params))
+module.exports.logError = (...params) => console.log(chalk.redBright(...params))

@@ -1,6 +1,5 @@
-.env
 node_modules
-.DS_Store
 output
-*.log
+.DS_STORE
+.env
 log

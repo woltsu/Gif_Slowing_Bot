@@ -17,6 +17,7 @@ const start = async () => {
   }
 
   // TODO: Add possibility to only slow down a specific part of a gif
+  // TODO: Add possibility to slow down urls in comments
   // TODO: Test how well raspberry performs
   // TODO: Database?
   const reddit = new Reddit({
@@ -48,7 +49,7 @@ const start = async () => {
           const id = `${item.kind}_${item.commentId}`
           const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.)`
           await reddit.replyToComment(message, id)
-          await reddit.markMessageRead(id)
+          //await reddit.markMessageRead(id)
           updateBotStatus(chalk.greenBright('DONE'), i, urlItems.length)
         } catch (e) {
           updateBotStatus(chalk.redBright('FAIL'), i, urlItems.length)
