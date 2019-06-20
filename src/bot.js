@@ -27,20 +27,24 @@ class Bot {
       const imgurUrl = await uploadToImgur(slowedFilePath, this.fileName)
       logger.info(`Uploaded ${ this.fileName } to imgur: ${ imgurUrl }`)
 
+      await this._teardown()
       process.send({ imgurUrl })
-      this._teardown()
     } catch (e) {
-      this._teardown()
+      await this._teardown()
       process.send({ error: { name: e.name, message: e.message } })
     }
   }
 
   async _teardown() {
-    logger.info('Tearing bot down...')
-    if (this.fileName) {
-      const files = await readdir(this.output)
-      const unlinks = files.filter(f => f.includes(this.fileName)).map(f => unlink(`${this.output}/${f}`))
-      await Promise.all(unlinks)
+    try {
+      logger.info('Tearing bot down...')
+      if (this.fileName) {
+        const files = await readdir(this.output)
+        const unlinks = files.filter(f => f.includes(this.fileName)).map(f => unlink(`${this.output}/${f}`))
+        await Promise.all(unlinks)
+      }
+    } catch (e) {
+      logger.error('Teardown failed!')
     }
   }
 }
