@@ -101,7 +101,7 @@ const getImgurUrl = async (id) => {
 
 const getGfycatUrl = async (id) => {
   try {
-    const { data: { gfyItem } } = await axios.get(`https://api.gfycat.com/v1/gfycats/${id}`)
+    const { data: { gfyItem } } = await axios.get(`https://api.gfycat.com/v1/gfycats/${id.split('-')[0]}`)
     return {
       url: gfyItem.mp4Url
     }
