@@ -6,7 +6,7 @@ if (NODE_ENV === 'development') {
   dotenv.config()
 }
 
-module.exports.VERSION = '0.1'
+module.exports.VERSION = '1.0'
 module.exports.LOGGING = true
 module.exports.CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890'
 module.exports.OUTPUT_DIR = './output'
@@ -15,7 +15,8 @@ module.exports.DOMAINS = {
   imgur: 'i.imgur.com',
   gfycat: 'gfycat.com',
   reddit_preview: 'preview.redd.it',
-  reddit_i: 'i.redd.it'
+  reddit_i: 'i.redd.it',
+  reddit_v: 'v.redd.it'
 }
 module.exports.SUPPORTED_DOMAINS = Object.values(module.exports.DOMAINS)
 

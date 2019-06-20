@@ -34,7 +34,7 @@ module.exports = class Reddit {
       commentData.append('text', content)
   
       const { data } = await this.api.post(
-        'https://oauth.reddit.com/api/comment',
+        '/api/comment',
         commentData
       )
       if (!data.success) {
@@ -50,7 +50,7 @@ module.exports = class Reddit {
       const data = new URLSearchParams()
       data.append('id', id)
       await this.api.post(
-        'https://oauth.reddit.com/api/read_message',
+        '/api/read_message',
         data.toString()
       )
     } catch (e) {
@@ -64,7 +64,7 @@ module.exports = class Reddit {
       const { data: { data } } = await this.api.get(
         '/message/unread'
       )
-  
+
       return data.children.filter(({ data: { subject } }) => {
         return subject === 'username mention'
       })
@@ -83,14 +83,15 @@ module.exports = class Reddit {
   
       const linkInfoUrl = `/r/${subreddit}/api/info?id=${link_id}`
       const { data: linkInfo } = await this.api.get(linkInfoUrl)
-      const { data: { url, domain } } = linkInfo.data.children[0]
-  
+      const { data: { url, domain, permalink } } = linkInfo.data.children[0]
+
       return {
         url: decode(url),
         commentId: id,
         kind,
         title: link_title,
-        domain: domain
+        domain: domain,
+        permalink
       }
     } catch (e) {
       handleError(e, ERRORS.ERROR_FETCHING_REDDIT_URL_DATA)

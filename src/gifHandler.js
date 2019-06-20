@@ -36,7 +36,7 @@ const download = async (urlItem, dir) => {
   }
 }
 
-const getGifData = async ({ url, domain }) => {
+const getGifData = async ({ url, domain, permalink }) => {
   if (domain === DOMAINS.imgur) {
     const urlParts = url.split('/')
     const id = urlParts[urlParts.length - 1].split('.')[0]
@@ -55,8 +55,26 @@ const getGifData = async ({ url, domain }) => {
     }
 
     return { url, format: 'gif' }
+  } else if (domain === DOMAINS.reddit_v) {
+    return await getRedditVUrl(permalink)
+
   } else {
     handleError(new Error(), ERRORS.ERROR_UNSUPPORTED_DOMAIN)
+  }
+}
+
+const getRedditVUrl = async (permalink) => {
+  const { data } = await axios.get(
+    `https://www.reddit.com${permalink}.json`
+  )
+  try {
+    let postData = data[0].data.children[0].data
+    if (postData.crosspost_parent_list) {
+      postData = postData.crosspost_parent_list[0]
+    }
+    return { url: postData.secure_media.reddit_video.fallback_url }
+  } catch (e) {
+    handleError(new Error(), ERRORS.ERROR_UNSUPPORTED_FORMAT)
   }
 }
 

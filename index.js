@@ -30,17 +30,22 @@ const start = async () => {
     process.exit(1)
   }
 
+  if (urlItems.length === 0) {
+    logger.info('No mentions!')
+    process.exit(0)
+  }
+
   urlItems.forEach((item, i) => {
     const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item)])
     logger.info(`BOT ${ i + 1 } IN PROGRESS`)
 
     child.on('message', async ({ imgurUrl, error }) => {
+      const id = `${item.kind}_${item.commentId}`
       if (imgurUrl) {
         try {
-          const id = `${item.kind}_${item.commentId}`
-          const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.)`
+          const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.) [^(GitHub)](https://github.com/woltsu/Gif_Slowing_Bot)`
           await reddit.replyToComment(message, id)
-          //await reddit.markMessageRead(id)
+          await reddit.markMessageRead(id)
           logger.info(`BOT ${ i + 1 } COMPLETED`)
         } catch (e) {
           logger.error('Failed replying to reddit comment. Will try again later.')
@@ -49,7 +54,7 @@ const start = async () => {
       } else if (error) {
         logger.info(`BOT ${ i + 1 } FAILED`)
         if ([ ERRORS.ERROR_UNSUPPORTED_FORMAT, ERRORS.ERROR_UNSUPPORTED_DOMAIN ].includes(error.message)) {
-          //await reddit.markMessageRead(id)
+          await reddit.markMessageRead(id)
         }
       }
     })
