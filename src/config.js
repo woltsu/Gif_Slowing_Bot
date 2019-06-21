@@ -6,6 +6,10 @@ if (NODE_ENV === 'development') {
   dotenv.config()
 }
 
+module.exports.NODE_ENVS = {
+  production: 'production',
+  development: 'development'
+}
 module.exports.VERSION = '1.0'
 module.exports.LOGGING = true
 module.exports.CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890'

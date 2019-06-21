@@ -1,7 +1,7 @@
 const spawn = require('child_process').spawn
 const path = require('path')
 const { LOGGING, DEFAULT_FORMAT } = require('./config')
-const logger = require('./logger')
+const logger = require('./logger')('ffmpeg')
 
 const slowMo = (fileName, dir) => {
   const file = path.resolve(dir, `${fileName}.${DEFAULT_FORMAT}`)

@@ -1,9 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const fork = require('child_process').fork
-const { ERRORS, OUTPUT_DIR } = require('./src/config')
+const { ERRORS, OUTPUT_DIR, NODE_ENVS } = require('./src/config')
 const Reddit = require('./src/reddit')
-const logger = require('./src/logger')
+const logger = require('./src/logger')()
 const OUTPUT_PATH = path.resolve(path.dirname(require.main.filename), OUTPUT_DIR)
 
 // TODO: Add possibility to only slow down a specific part of a gif
@@ -36,7 +36,7 @@ const start = async () => {
   }
 
   urlItems.forEach((item, i) => {
-    const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item)])
+    const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item), i + 1])
     logger.info(`BOT ${ i + 1 } IN PROGRESS`)
 
     child.on('message', async ({ imgurUrl, error }) => {
@@ -45,7 +45,9 @@ const start = async () => {
         try {
           const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.) [^(GitHub)](https://github.com/woltsu/Gif_Slowing_Bot)`
           await reddit.replyToComment(message, id)
-          await reddit.markMessageRead(id)
+          if (process.env.NODE_ENV === NODE_ENVS.production) {
+            await reddit.markMessageRead(id)
+          }
           logger.info(`BOT ${ i + 1 } COMPLETED`)
         } catch (e) {
           logger.error('Failed replying to reddit comment. Will try again later.')
@@ -54,7 +56,9 @@ const start = async () => {
       } else if (error) {
         logger.info(`BOT ${ i + 1 } FAILED`)
         if ([ ERRORS.ERROR_UNSUPPORTED_FORMAT, ERRORS.ERROR_UNSUPPORTED_DOMAIN ].includes(error.message)) {
-          await reddit.markMessageRead(id)
+          if (process.env.NODE_ENV === NODE_ENVS.production) {
+            await reddit.markMessageRead(id)
+          }
         }
       }
     })

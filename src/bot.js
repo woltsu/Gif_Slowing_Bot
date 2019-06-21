@@ -6,7 +6,8 @@ const { DEFAULT_FORMAT } = require('./config')
 const readdir = promisify(fs.readdir)
 const unlink = promisify(fs.unlink)
 const path = require('path')
-const logger = require('./logger')
+const id = process.argv[4]
+const logger = require('./logger')(`BOT ${ id }`)
 
 class Bot {
   constructor({ urlItem, output }) {

@@ -3,7 +3,7 @@ const decode = require('unescape')
 const _ = require('lodash')
 const { VERSION, SUPPORTED_DOMAINS, ERRORS } = require('./config')
 const { handleError } = require('./errorHandler')
-const logger = require('./logger')
+const logger = require('./logger')('reddit')
 
 module.exports = class Reddit {
   constructor(props) {
@@ -65,9 +65,15 @@ module.exports = class Reddit {
         '/message/unread'
       )
 
-      return data.children.filter(({ data: { subject } }) => {
-        return subject === 'username mention'
-      })
+      const mentionedMessages = []
+      const messages = data.children
+      for (let i = 0; i < messages.length; i++) {
+        const { data: { subject, name } } = messages[i]
+        subject === 'username mention' ?
+          mentionedMessages.push(messages[i]) :
+          await this.markMessageRead(name)
+      }
+      return mentionedMessages
     } catch (e) {
       handleError(e, ERRORS.ERROR_FETCHING_REDDIT_MENTIONS)
     }

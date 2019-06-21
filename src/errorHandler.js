@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const { ERRORS } = require('./config')
-const logger = require('./logger')
+const logger = require('./logger')('error')
 
 module.exports.handleError = (e, errorMessage) => {
   logger.error(e.name)
