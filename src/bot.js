@@ -21,7 +21,7 @@ class Bot {
       this.fileName = await download(this.urlItem, this.output)
 
       logger.info(`Applying slow mo to ${ this.fileName }...`)
-      await slowMo(this.fileName, this.output)
+      await slowMo(this.fileName, this.output, { startTime: this.urlItem.startTime })
 
       logger.info('Uploading to imgur...')
       const slowedFilePath = path.resolve(this.output, `${this.fileName}.slowed.${DEFAULT_FORMAT}`)

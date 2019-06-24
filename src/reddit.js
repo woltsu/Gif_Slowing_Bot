@@ -8,6 +8,7 @@ const logger = require('./logger')('reddit')
 module.exports = class Reddit {
   constructor(props) {
     _.map(props, (val, key) => this[key] = val)
+    this.startTimeRegex = /@[0-5][0-9]:[0-5][0-9]/g
   }
 
   async getUrls() {
@@ -81,8 +82,14 @@ module.exports = class Reddit {
 
   async _getUrlItem(comment) {
     try {
-      const { kind, data: { id, subreddit, link_title } } = comment
-  
+      const { kind, data: { id, subreddit, link_title, body_html } } = comment
+      const decodedBody = decode(body_html)
+      const startTimeIndex = decodedBody.search(this.startTimeRegex)
+
+      const startTime = startTimeIndex > 0 ?
+        `${decodedBody.slice(startTimeIndex + 1, startTimeIndex + 6)}` :
+        null
+
       const commentInfoUrl = `/r/${subreddit}/api/info?id=${kind}_${id}`
       const { data: commentInfo } = await this.api.get(commentInfoUrl)
       const { data: { link_id} } = commentInfo.data.children[0]
@@ -97,7 +104,8 @@ module.exports = class Reddit {
         kind,
         title: link_title,
         domain: domain,
-        permalink
+        permalink,
+        startTime
       }
     } catch (e) {
       handleError(e, ERRORS.ERROR_FETCHING_REDDIT_URL_DATA)
