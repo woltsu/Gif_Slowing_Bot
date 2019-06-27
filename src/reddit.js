@@ -1,7 +1,7 @@
 const axios = require('axios').default
 const decode = require('unescape')
 const _ = require('lodash')
-const { VERSION, SUPPORTED_DOMAINS, ERRORS } = require('./config')
+const { VERSION, ERRORS, NODE_ENVS, MESSAGE_SUBJECTS } = require('./config')
 const { handleError } = require('./errorHandler')
 const logger = require('./logger')('reddit')
 
@@ -20,11 +20,7 @@ module.exports = class Reddit {
     
     logger.info('Getting gif urls from mentions...')
     return new Promise(resolve => {
-      Promise.all(urlPromises).then((items) => {
-        resolve(items.filter(({ domain }) => {
-          return SUPPORTED_DOMAINS.includes(domain)
-        }))
-      })
+      Promise.all(urlPromises).then(urlItems => resolve(urlItems))
     })
   }
 
@@ -47,6 +43,7 @@ module.exports = class Reddit {
   }
 
   async markMessageRead(id) {
+    if (process.env.NODE_ENV !== NODE_ENVS.production) return
     try {
       const data = new URLSearchParams()
       data.append('id', id)
@@ -69,10 +66,15 @@ module.exports = class Reddit {
       const mentionedMessages = []
       const messages = data.children
       for (let i = 0; i < messages.length; i++) {
-        const { data: { subject, name } } = messages[i]
-        subject === 'username mention' ?
-          mentionedMessages.push(messages[i]) :
+        const { data: { subject, name, body_html } } = messages[i]
+        if (
+          _.includes(_.values(MESSAGE_SUBJECTS), subject) &&
+          decode(body_html).toLowerCase().includes(`u/${this.username.toLowerCase()}`)
+        ) {
+          mentionedMessages.push(messages[i])
+        } else {
           await this.markMessageRead(name)
+        }
       }
       return mentionedMessages
     } catch (e) {
@@ -122,7 +124,7 @@ module.exports = class Reddit {
       this.api.defaults.headers.common = {
         ...this.api.defaults.headers.common,
         'Authorization': `Bearer ${ accessToken }`,
-        'User-Agent': `gif_slowing_bot/${VERSION} by /u/Gif_Slowing_Bot`,
+        'User-Agent': `${this.username}/${VERSION} by /u/${this.username}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     } catch (e) {

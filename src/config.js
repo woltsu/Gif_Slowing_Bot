@@ -22,7 +22,11 @@ module.exports.DOMAINS = {
   reddit_i: 'i.redd.it',
   reddit_v: 'v.redd.it'
 }
-module.exports.SUPPORTED_DOMAINS = Object.values(module.exports.DOMAINS)
+
+module.exports.MESSAGE_SUBJECTS = {
+  usernameMention: 'username mention',
+  commentReply: 'comment reply'
+}
 
 module.exports.ERRORS = {
   ERROR_FETCHING_GIF_INFO: 'Error fetching gif info',
