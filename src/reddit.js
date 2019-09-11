@@ -1,7 +1,7 @@
 const axios = require('axios').default
 const decode = require('unescape')
 const _ = require('lodash')
-const { VERSION, ERRORS, NODE_ENVS, MESSAGE_SUBJECTS } = require('./config')
+const { VERSION, ERRORS, NODE_ENVS, MESSAGE_SUBJECTS, DOMAINS } = require('./config')
 const { handleError } = require('./errorHandler')
 const logger = require('./logger')('reddit')
 
@@ -9,6 +9,7 @@ module.exports = class Reddit {
   constructor(props) {
     _.map(props, (val, key) => this[key] = val)
     this.startTimeRegex = /@[0-5][0-9]:[0-5][0-9]/g
+    this.urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g
   }
 
   async getUrls() {
@@ -84,13 +85,31 @@ module.exports = class Reddit {
 
   async _getUrlItem(comment) {
     try {
-      const { kind, data: { id, subreddit, link_title, body_html } } = comment
+      const { kind, data: { id, subreddit, link_title, body_html, parent_id } } = comment
+
       const decodedBody = decode(body_html)
       const startTimeIndex = decodedBody.search(this.startTimeRegex)
 
       const startTime = startTimeIndex > 0 ?
         `${decodedBody.slice(startTimeIndex + 1, startTimeIndex + 6)}` :
         null
+
+      const parent = await this.api.get(`/r/${subreddit}/api/info?id=${parent_id}`)
+      const parentBody = decode(parent.data.data.children[0].data.body_html)
+      const parentBodyUrlMatches = parentBody.match(this.urlRegex)
+      if (parentBodyUrlMatches && parentBodyUrlMatches.length) {
+        const url = parentBodyUrlMatches[0]
+        const domain = Object.values(DOMAINS).find(d => url.includes(d))
+        if (domain && domain !== DOMAINS.reddit_v) {
+          return {
+            url,
+            commentId: id,
+            kind,
+            domain,
+            startTime
+          }
+        }
+      }
 
       const commentInfoUrl = `/r/${subreddit}/api/info?id=${kind}_${id}`
       const { data: commentInfo } = await this.api.get(commentInfoUrl)
@@ -105,7 +124,7 @@ module.exports = class Reddit {
         commentId: id,
         kind,
         title: link_title,
-        domain: domain,
+        domain,
         permalink,
         startTime
       }
