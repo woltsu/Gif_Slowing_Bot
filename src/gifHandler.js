@@ -129,7 +129,7 @@ const uploadToImgur = async (file, name) => {
       ...formData.getHeaders()
     }
 
-    const { data: { data } } = await axios.post(`https://api.imgur.com/3/upload`, formData, { headers })
+    const { data: { data } } = await axios.post(`https://api.imgur.com/3/upload`, formData, { headers, maxContentLength: Infinity })
     return data.link
   } catch (e) {
     handleError(e, ERRORS.ERROR_UPLOADING_TO_IMGUR)
