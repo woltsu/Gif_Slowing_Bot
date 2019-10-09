@@ -121,9 +121,14 @@ module.exports = class Reddit {
       const linkInfoUrl = `/r/${subreddit}/api/info?id=${link_id}`
       const { data: linkInfo } = await this.api.get(linkInfoUrl)
       const { data: { url, domain, permalink } } = linkInfo.data.children[0]
+      let decodedUrl = decode(url)
+
+      if (domain === DOMAINS.imgur) {
+        decodedUrl = decodedUrl.replace('imgur', 'i.imgur')
+      }
 
       return {
-        url: decode(url),
+        url: decodedUrl,
         commentId: id,
         kind,
         title: link_title,
