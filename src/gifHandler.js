@@ -37,7 +37,7 @@ const download = async (urlItem, dir) => {
 }
 
 const getGifData = async ({ url, domain, permalink }) => {
-  if (domain === DOMAINS.imgur) {
+  if (domain === DOMAINS.i_imgur || domain === DOMAINS.imgur) {
     const urlParts = url.split('/')
     const id = urlParts[urlParts.length - 1].split('.')[0]
     return await getImgurUrl(id)

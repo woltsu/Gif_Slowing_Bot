@@ -16,7 +16,8 @@ module.exports.CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890'
 module.exports.OUTPUT_DIR = './output'
 module.exports.DEFAULT_FORMAT = 'mp4'
 module.exports.DOMAINS = {
-  imgur: 'i.imgur.com',
+  i_imgur: 'i.imgur.com',
+  imgur: 'imgur.com',
   gfycat: 'gfycat.com',
   reddit_preview: 'preview.redd.it',
   reddit_i: 'i.redd.it',

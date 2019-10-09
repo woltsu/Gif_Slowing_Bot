@@ -98,9 +98,12 @@ module.exports = class Reddit {
       const parentBody = decode(parent.data.data.children[0].data.body_html)
       const parentBodyUrlMatches = parentBody.match(this.urlRegex)
       if (parentBodyUrlMatches && parentBodyUrlMatches.length) {
-        const url = parentBodyUrlMatches[0]
+        let url = parentBodyUrlMatches[0]
         const domain = Object.values(DOMAINS).find(d => url.includes(d))
         if (domain && domain !== DOMAINS.reddit_v) {
+          if (domain === DOMAINS.imgur) {
+            url = url.replace('imgur', 'i.imgur')
+          }
           return {
             url,
             commentId: id,

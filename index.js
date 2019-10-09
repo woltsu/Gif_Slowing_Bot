@@ -42,7 +42,7 @@ const start = async () => {
       const id = `${item.kind}_${item.commentId}`
       if (imgurUrl) {
         try {
-          const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.) [^(GitHub)](https://github.com/woltsu/Gif_Slowing_Bot)`
+          const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.) [^(GitHub)](https://github.com/woltsu/Gif_Slowing_Bot) ^(|) [^(FAQ)](https://www.reddit.com/user/Gif_Slowing_Bot/comments/c26pca/ugif_slowing_bot/) ^(|) [^(Report an issue)](https://www.reddit.com/message/compose/?to=appl3xx&subject=Gif_Slowing_Bot%20Issue)`
           await reddit.replyToComment(message, id)
           await reddit.markMessageRead(id)
           logger.info(`BOT ${ i + 1 } COMPLETED`)
