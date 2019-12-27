@@ -20,8 +20,7 @@ module.exports.DOMAINS = {
   imgur: 'imgur.com',
   gfycat: 'gfycat.com',
   reddit_preview: 'preview.redd.it',
-  reddit_i: 'i.redd.it',
-  reddit_v: 'v.redd.it'
+  reddit_i: 'i.redd.it'
 }
 
 module.exports.MESSAGE_SUBJECTS = {
