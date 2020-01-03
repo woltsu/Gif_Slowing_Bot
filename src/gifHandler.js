@@ -116,9 +116,47 @@ const generateName = () => {
   return result
 }
 
+const sleep = ms => new Promise(res => setTimeout(() => res(), ms))
+
+const uploadToGfycat = async (file, name) => {
+  try {
+    const token = (await axios.post('https://api.gfycat.com/v1/oauth/token', {
+      client_id: process.env.GFYCAT_CLIENT_ID,
+      client_secret: process.env.GFYCAT_CLIENT_SECRET,
+      grant_type: 'client_credentials'
+    })).data.access_token
+
+    const { gfyname } = (await axios.post('https://api.gfycat.com/v1/gfycats', {}, { headers: { Authorization: token } })).data
+    const formData = new FormData()
+    formData.append('key', gfyname)
+
+    const { size } = await fs.statSync(file)
+    formData.append('file', fs.createReadStream(file), { filename: gfyname, knownLength: size })
+    await axios.post('https://filedrop.gfycat.com', formData, { headers: { 'Content-Length': formData.getLengthSync().toString(), ...formData.getHeaders() }, maxContentLength: Infinity, maxBodyLength: Infinity })
+
+    const fetchName = async () => {
+      const { task, gfyname: finalGfyname } = (await axios.get(`https://api.gfycat.com/v1/gfycats/fetch/status/${gfyname}`, { headers: { Authorization: token } })).data
+      if (task === 'encoding' || task === 'NotFoundo') {
+        await sleep(1000)
+        return fetchName()
+      } else if (task === 'complete') {
+        return finalGfyname
+      } else {
+        throw new Error(`Fetching final gfycat name failed! ${task}`)
+      }
+    }
+
+    return (await fetchName())
+  } catch (e) {
+    handleError(e, ERRORS.ERROR_UPLOADING_TO_GFYCAT)
+  }
+}
+
 const uploadToImgur = async (file, name) => {
   try {
     const formData = new FormData()
+    const f = await fs.statSync(file)
+
     formData.append('video', fs.createReadStream(file))
     formData.append('name', name)
     formData.append('type', 'file')
@@ -126,17 +164,20 @@ const uploadToImgur = async (file, name) => {
 
     const headers = {
       Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+      'Content-Length': f['size'],
       ...formData.getHeaders()
     }
 
-    const { data: { data } } = await axios.post(`https://api.imgur.com/3/upload`, formData, { headers, maxContentLength: Infinity })
+    const { data: { data } } = await axios.post(`https://api.imgur.com/3/upload/`, formData, { headers, maxContentLength: Infinity, maxBodyLength: Infinity })
     return data.link
   } catch (e) {
+    console.log('e', e.response.data)
     handleError(e, ERRORS.ERROR_UPLOADING_TO_IMGUR)
   }
 }
 
 module.exports = {
   download,
-  uploadToImgur
+  uploadToImgur,
+  uploadToGfycat
 }

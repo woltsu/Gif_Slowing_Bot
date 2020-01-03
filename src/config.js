@@ -20,7 +20,8 @@ module.exports.DOMAINS = {
   imgur: 'imgur.com',
   gfycat: 'gfycat.com',
   reddit_preview: 'preview.redd.it',
-  reddit_i: 'i.redd.it'
+  reddit_i: 'i.redd.it',
+  reddit_v: 'v.redd.it'
 }
 
 module.exports.MESSAGE_SUBJECTS = {
@@ -38,5 +39,6 @@ module.exports.ERRORS = {
   ERROR_MARKING_REDDIT_MESSAGE_READ: 'Error marking reddit messages read',
   ERROR_REPLYING_TO_REDDIT_COMMENT: 'Error replying to reddit comment',
   ERROR_UNSUPPORTED_FORMAT: 'Error unsupported format',
-  ERROR_UPLOADING_TO_IMGUR: 'Error uploading to imgur'
+  ERROR_UPLOADING_TO_IMGUR: 'Error uploading to imgur',
+  ERROR_UPLOADING_TO_GFYCAT: 'Error uploading to gfycat'
 }

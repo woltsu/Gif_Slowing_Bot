@@ -38,11 +38,11 @@ const start = async () => {
     const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item), i + 1])
     logger.info(`BOT ${ i + 1 } IN PROGRESS`)
 
-    child.on('message', async ({ imgurUrl, error }) => {
+    child.on('message', async ({ gfycatUrl, error }) => {
       const id = `${item.kind}_${item.commentId}`
-      if (imgurUrl) {
+      if (gfycatUrl) {
         try {
-          const message = `${ imgurUrl }\n\n---\n\n^(I am a bot.) [^(GitHub)](https://github.com/woltsu/Gif_Slowing_Bot) ^(|) [^(FAQ)](https://www.reddit.com/user/Gif_Slowing_Bot/comments/c26pca/ugif_slowing_bot/) ^(|) [^(Report an issue)](https://www.reddit.com/message/compose/?to=appl3xx&subject=Gif_Slowing_Bot%20Issue)`
+          const message = `${ gfycatUrl }\n\n---\n\n^(I am a bot.) [^(GitHub)](https://github.com/woltsu/Gif_Slowing_Bot) ^(|) [^(FAQ)](https://www.reddit.com/user/Gif_Slowing_Bot/comments/c26pca/ugif_slowing_bot/) ^(|) [^(Report an issue)](https://www.reddit.com/message/compose/?to=appl3xx&subject=Gif_Slowing_Bot%20Issue)`
           await reddit.replyToComment(message, id)
           await reddit.markMessageRead(id)
           logger.info(`BOT ${ i + 1 } COMPLETED`)

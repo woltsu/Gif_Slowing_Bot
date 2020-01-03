@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { download, uploadToImgur } = require('./gifHandler')
+const { download, uploadToImgur, uploadToGfycat } = require('./gifHandler')
 const { slowMo } = require('./ffmpeg')
 const { promisify } = require('util')
 const { DEFAULT_FORMAT } = require('./config')
@@ -23,13 +23,14 @@ class Bot {
       logger.info(`Applying slow mo to ${ this.fileName }...`)
       await slowMo(this.fileName, this.output, { startTime: this.urlItem.startTime })
 
-      logger.info('Uploading to imgur...')
+      logger.info('Uploading to gfycat...')
       const slowedFilePath = path.resolve(this.output, `${this.fileName}.slowed.${DEFAULT_FORMAT}`)
-      const imgurUrl = await uploadToImgur(slowedFilePath, this.fileName)
-      logger.info(`Uploaded ${ this.fileName } to imgur: ${ imgurUrl }`)
+
+      const gfycatUrl = `https://gfycat.com/${await uploadToGfycat(slowedFilePath, this.fileName)}`
+      logger.info(`Uploaded ${ this.fileName } to gfycat: ${ gfycatUrl }`)
 
       await this._teardown()
-      process.send({ imgurUrl })
+      process.send({ gfycatUrl })
     } catch (e) {
       await this._teardown()
       process.send({ error: { name: e.name, message: e.message } })
