@@ -1,5 +1,5 @@
 # Gif_Slowing_Bot
-A Reddit bot that slows down gifs when it is invoked, uploads the slowed down version to imgur and replies the imgur link back to the invoker. The dockerized version runs the bot script automatically every minute.
+A Reddit bot that slows down gifs when it is invoked, uploads the slowed down version to gfycat and replies the gfycat link back to the invoker. The dockerized version runs the bot script automatically every minute.
 
 ## Getting Started
 
