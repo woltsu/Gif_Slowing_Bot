@@ -24,16 +24,12 @@ const start = async () => {
   })
 
   logger.info('Fetching urls...')
-  let urlItems
-  try {
-    urlItems = await reddit.getUrls()
-  } catch (e) {
-    process.exit(1)
-  }
+  const urlItems = await reddit.getUrls()
 
   if (urlItems.length === 0) {
     logger.info('No mentions!')
-    process.exit(0)
+    RUNNING = false
+    return
   }
 
   let finishedAmount = 0
@@ -68,7 +64,7 @@ const start = async () => {
   })
 }
 
-schedule('* * * * * *', async () => {
+schedule('*/20 * * * * *', async () => {
   if (!RUNNING) {
     RUNNING = true
     try {
