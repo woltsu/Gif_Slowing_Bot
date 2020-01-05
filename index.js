@@ -1,14 +1,16 @@
 const fs = require('fs')
 const path = require('path')
 const fork = require('child_process').fork
-const { ERRORS, OUTPUT_DIR, NODE_ENVS } = require('./src/config')
+const { CronJob } = require('cron')
+const { ERRORS, OUTPUT_DIR } = require('./src/config')
 const Reddit = require('./src/reddit')
 const logger = require('./src/logger')()
 const OUTPUT_PATH = path.resolve(path.dirname(require.main.filename), OUTPUT_DIR)
 
-// TODO: Add possibility to slow down urls in comments
-// TODO: Test how well raspberry performs
-// TODO: Database?
+let RUNNING = false
+
+const schedule = (cronTime, func) => new CronJob({ cronTime, onTick: func, start: true, timeZone: 'Europe/Helsinki' })
+
 const start = async () => {
   if (!fs.existsSync(OUTPUT_PATH)) {
     fs.mkdirSync(OUTPUT_PATH)
@@ -34,6 +36,7 @@ const start = async () => {
     process.exit(0)
   }
 
+  let finishedAmount = 0
   urlItems.forEach((item, i) => {
     const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item), i + 1])
     logger.info(`BOT ${ i + 1 } IN PROGRESS`)
@@ -53,11 +56,26 @@ const start = async () => {
       } else if (error) {
         logger.info(`BOT ${ i + 1 } FAILED`)
         if ([ ERRORS.ERROR_UNSUPPORTED_FORMAT, ERRORS.ERROR_UNSUPPORTED_DOMAIN ].includes(error.message)) {
-          await reddit.markMessageRead(id)
+          try {
+            await reddit.markMessageRead(id)
+          } catch (e) {
+            console.log(e)
+          }
         }
       }
+      if (++finishedAmount === urlItems.length) RUNNING = false
     })
   })
 }
 
-start()
+schedule('* * * * * *', async () => {
+  if (!RUNNING) {
+    RUNNING = true
+    try {
+      await start()
+    } catch (e) {
+      RUNNING = false
+      console.log(e)
+    }
+  }
+})

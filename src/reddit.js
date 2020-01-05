@@ -5,6 +5,8 @@ const { VERSION, ERRORS, NODE_ENVS, MESSAGE_SUBJECTS, DOMAINS } = require('./con
 const { handleError } = require('./errorHandler')
 const logger = require('./logger')('reddit')
 
+const sleep = ms => new Promise(res => setTimeout(() => res(), ms))
+
 module.exports = class Reddit {
   constructor(props) {
     _.map(props, (val, key) => this[key] = val)
@@ -48,10 +50,21 @@ module.exports = class Reddit {
     try {
       const data = new URLSearchParams()
       data.append('id', id)
-      await this.api.post(
-        '/api/read_message',
-        data.toString()
-      )
+      for (let i = 1; i <= 6; i++) {
+        try {
+          await this.api.post(
+            '/api/read_message',
+            data.toString()
+          )
+          break
+        } catch (e) {
+          if (i === 6) {
+            throw e
+          }
+
+          await sleep(10000 * i)
+        }
+      }
     } catch (e) {
       handleError(e, ERRORS.ERROR_MARKING_REDDIT_MESSAGE_READ)
     }
