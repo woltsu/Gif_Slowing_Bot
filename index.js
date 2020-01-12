@@ -24,7 +24,15 @@ const start = async () => {
   })
 
   logger.info('Fetching urls...')
-  const urlItems = await reddit.getUrls()
+  let urlItems
+
+  try {
+    urlItems = await reddit.getUrls()
+  } catch (e) {
+    logger.error(e)
+    RUNNING = false
+    return
+  }
 
   if (urlItems.length === 0) {
     logger.info('No mentions!')
