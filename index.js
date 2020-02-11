@@ -43,7 +43,7 @@ const start = async () => {
   let finishedAmount = 0
   urlItems.forEach((item, i) => {
     const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item), i + 1])
-    logger.info(`BOT ${ i + 1 } IN PROGRESS`)
+    logger.info(`BOT ${ i + 1 } IN PROGRESS`, item)
 
     child.on('message', async ({ gfycatUrl, error }) => {
       const id = `${item.kind}_${item.commentId}`
