@@ -22,8 +22,13 @@ module.exports = class Reddit {
     const urlPromises = messages.map(m => this._getUrlItem(m))
     
     logger.info('Getting gif urls from mentions...')
-    return new Promise(resolve => {
-      Promise.all(urlPromises).then(urlItems => resolve(urlItems))
+    return new Promise(async (resolve, reject) => {
+      try {
+        const urlItems = await Promise.all(urlPromises)
+        resolve(urlItems)
+      } catch (e) {
+        reject(e)
+      }
     })
   }
 
