@@ -54,16 +54,16 @@ const start = async () => {
           await reddit.markMessageRead(id)
           logger.info(`BOT ${ i + 1 } COMPLETED`)
         } catch (e) {
-          logger.error('Failed replying to reddit comment. Will try again later.')
+          logger.error('Failed replying to reddit comment. Will try again later.', item)
           logger.info(`BOT ${ i + 1 } FAILED`)
         }
       } else if (error) {
-        logger.info(`BOT ${ i + 1 } FAILED`)
+        logger.info(`BOT ${ i + 1 } FAILED`, item)
         if ([ ERRORS.ERROR_UNSUPPORTED_FORMAT, ERRORS.ERROR_UNSUPPORTED_DOMAIN ].includes(error.message)) {
           try {
             await reddit.markMessageRead(id)
           } catch (e) {
-            console.log(e)
+            console.log(e, item)
           }
         }
       }
