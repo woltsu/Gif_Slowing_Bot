@@ -43,7 +43,7 @@ const start = async () => {
   let finishedAmount = 0
   urlItems.forEach((item, i) => {
     const child = fork('./src/bot.js', [ OUTPUT_PATH, JSON.stringify(item), i + 1])
-    logger.info(`BOT ${ i + 1 } IN PROGRESS`, item)
+    logger.info(`BOT ${ i + 1 } IN PROGRESS`)
 
     child.on('message', async ({ gfycatUrl, error }) => {
       const id = `${item.kind}_${item.commentId}`
@@ -54,11 +54,14 @@ const start = async () => {
           await reddit.markMessageRead(id)
           logger.info(`BOT ${ i + 1 } COMPLETED`)
         } catch (e) {
-          logger.error('Failed replying to reddit comment. Will try again later.', item)
+          logger.error('Failed replying to reddit comment. Will try again later.')
+          console.log('ITEM', item)
           logger.info(`BOT ${ i + 1 } FAILED`)
         }
       } else if (error) {
         logger.info(`BOT ${ i + 1 } FAILED`, item)
+        console.log('ITEM', item)
+        console.log('ERROR', error)
         if ([ ERRORS.ERROR_UNSUPPORTED_FORMAT, ERRORS.ERROR_UNSUPPORTED_DOMAIN ].includes(error.message)) {
           try {
             await reddit.markMessageRead(id)
